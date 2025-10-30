@@ -1,0 +1,65 @@
+*** Settings ***
+Library   OperatingSystem
+Library   Collections
+Library   String
+Library   Dialogs
+Library   FakerLibrary  locale=fi_FI
+
+*** Variables ***
+${save_in_file}  personal_data.txt
+
+*** Keywords ***
+Get Random Names
+    [Arguments]   ${number_of_names}
+    ${names}=   Create List
+    FOR  ${n}  IN RANGE   ${number_of_names}
+        ${fake_name}=   FakerLibrary.Name
+        Append To List  ${names}  ${fake_name}
+        #Log To Console  ${fake_name}
+    END
+    RETURN   ${names}
+
+Remove Existing Address File
+    [Arguments]   ${file_to_remove}
+    TRY
+       File Should Exist  ${file_to_remove}
+       ${content}=  Get File  ${file_to_remove}
+       ${lines}=  Split To Lines  ${content}
+       ${first}=  Get From List  ${lines}  0
+       Log To Console  \nData of ${first} is deleted
+       Remove File  ${file_to_remove}
+    EXCEPT
+       Log To Console  \nFile Not Found!\n
+    END
+
+
+*** Test Cases ***
+Remove Existing File
+    Remove Existing Address File   ${save_in_file}
+
+FakerLibrary Data
+    #Log To Console  \nGenerated random names:
+    ${names}=  Get Random Names  5
+    #Log to Console  \n${names}
+    ${chosen_name}=  Get Selection From User  CHOOSE A NAME:  @{names}
+    #Log To Console  \nYOUR CHOICE: ${chosen_name}
+    ${fake_st_addr}=  FakerLibrary.Street Address
+    ${fake_postcode}=  FakerLibrary.Postcode
+    ${fake_city}=  FakerLibrary.City
+
+    Create File  personal_data.txt  ${chosen_name}\n${fake_st_addr}\n${fake_postcode} ${fake_city}
+    ${content}=  Get File  ${save_in_file}
+    Log To Console  \n\n${content}
+
+Check File Content
+    ${content}=  Get File  ${save_in_file}
+    ${lines}=  Split To Lines  ${content}
+    ${line_counter}=  Get Length  ${lines}
+    IF  ${line_counter} == 3
+        Log To Console  \nFile is correct: containing ${line_counter} lines\n
+    ELSE
+        Fail  \nFile is incorrect\n
+    END
+
+
+
