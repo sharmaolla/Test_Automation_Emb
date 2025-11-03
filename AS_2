@@ -1,0 +1,36 @@
+*** Settings ***
+Documentation     Example of morse transmitter test
+...
+...               Change this example to use data driven style 
+...               Test with different texts and speeds
+
+Library           AtCommandLibrary.py
+Library           String
+Test Template     Send and verify output
+
+
+*** Keywords ***
+Verify echo
+    [Arguments]    ${testing_data}
+    Log To Console    \nTesting for "${testing_data}"
+    Send text    ${testing_data}
+    Response should be    AT+SEND="${testing_data}"
+
+
+Send and verify output
+    [Arguments]    ${testing_data}    ${expected_response}
+    Verify echo    ${testing_data}
+    Response should be    SENT="${expected_response}"
+    Response should be    OK
+
+
+*** Test Cases ***                ${testing_data}                                 ${expected_response}
+#All small letters                 hello world                                     HELLO WORLD
+#All capital letters               HELLO WORLD                                     HELLO WORLD
+#All numbers                       145 789                                         145 789
+#Letters + numbers                 Clb 4567 Z                                      CLB 4567 Z
+#Long text                         Very very very long text                        VERY VERY VERY LONG TEXT
+Other characters                   $&,,()!!!                                       XXXXXXXXX
+Mixed combo                        HelLO26 wOrld!!! :)                             HELLO26 WORLDXXX XX
+
+
