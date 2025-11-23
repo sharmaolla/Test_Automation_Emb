@@ -1,0 +1,40 @@
+*** Settings ***
+Documentation     Testing website using Browser Library
+Library           Browser
+Library           Dialogs
+
+*** Variables ***
+${URL}      http://localhost:3000
+
+*** Test Cases ***
+Adding three cars and taking screenshots before and after
+    [Setup]    Open Car Dealer Website
+    Take Screenshot Before Adding Cars
+    Add Car    Honda    Jazz       300000     2010    ABC-123
+    Add Car    Toyota   Auris      210000     2015    DEF-123
+    Add Car    BMW      3 Series   5000      2025     GHI-123
+    Take Screenshot After Adding Cars
+    [Teardown]    Close Browser
+
+*** Keywords ***
+Open Car Dealer Website
+    New Browser    chromium    headless=No
+    New Page    ${URL}
+
+Take Screenshot Before Adding Cars
+    Take Screenshot    ${CURDIR}/before.png
+
+Take Screenshot After Adding Cars
+    Take Screenshot    ${CURDIR}/after.png
+
+Add Car
+    [Arguments]        ${make}     ${model}      ${mileage}        ${year}      ${plate}
+    Click      text=Add a car
+    Fill Text      id=make-input          ${make}
+    Fill Text      id=model-input         ${model}
+    Fill Text      id=mileage-input       ${mileage}
+    Fill Text      id=year-input          ${year}
+    Fill Text      id=plate-input         ${plate}
+    Click      text=Add a new car
+
+
